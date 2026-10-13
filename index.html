@@ -1,0 +1,913 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>九九乘法練習樂園</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background: linear-gradient(135deg, #eaf5ff, #f5efff);
+      color: #334155;
+      padding: 24px 14px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 18px 10px 24px;
+    }
+
+    .mascot {
+      font-size: 58px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      color: #3765b5;
+      font-size: clamp(27px, 5vw, 38px);
+    }
+
+    header p {
+      color: #64748b;
+      margin: 0;
+      line-height: 1.7;
+    }
+
+    .card {
+      background: white;
+      border-radius: 22px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 28px rgba(71, 85, 105, 0.09);
+    }
+
+    h2 {
+      font-size: 20px;
+      margin: 0 0 16px;
+      color: #334e80;
+    }
+
+    .hint {
+      color: #64748b;
+      font-size: 14px;
+      margin: -8px 0 16px;
+      line-height: 1.6;
+    }
+
+    .range-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .range-option {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .range-option input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .range-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      min-height: 76px;
+      border: 2px solid #e2e8f0;
+      border-radius: 15px;
+      background: #f8fafc;
+      transition: 0.15s;
+      text-align: center;
+      padding: 8px 3px;
+    }
+
+    .range-number {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .range-small {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .range-option input:checked + .range-label {
+      background: #e7f0ff;
+      border-color: #6194ed;
+      color: #2857a5;
+    }
+
+    .range-option input:checked + .range-label .range-small {
+      color: #2857a5;
+    }
+
+    .range-option input:focus-visible + .range-label {
+      outline: 3px solid #93c5fd;
+      outline-offset: 3px;
+    }
+
+    .tools {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: none;
+      border-radius: 12px;
+      padding: 11px 17px;
+      font-weight: 700;
+      transition: transform 0.12s, opacity 0.12s;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .btn-light {
+      background: #eef2ff;
+      color: #465d9a;
+    }
+
+    .btn-primary {
+      background: #4f83e3;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #356bd0;
+    }
+
+    .btn-green {
+      background: #d9f7e7;
+      color: #167447;
+    }
+
+    .btn-block {
+      width: 100%;
+      padding: 15px;
+      font-size: 17px;
+      margin-top: 20px;
+    }
+
+    .settings-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .settings-row label {
+      flex: 1;
+      min-width: 130px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    select {
+      display: block;
+      width: 100%;
+      margin-top: 8px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      background: white;
+      color: #334155;
+      font: inherit;
+    }
+
+    .selection-summary {
+      background: #f1f6ff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-top: 16px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: #42608f;
+    }
+
+    .game-card {
+      text-align: center;
+    }
+
+    .game-status {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 18px;
+    }
+
+    .progress-track {
+      height: 9px;
+      border-radius: 20px;
+      background: #e2e8f0;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #65a5f6, #a78bfa);
+      transition: width 0.2s;
+    }
+
+    .question {
+      font-size: clamp(36px, 9vw, 58px);
+      font-weight: 800;
+      color: #315fa9;
+      margin: 20px 0 25px;
+      overflow-wrap: anywhere;
+    }
+
+    .answer-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      max-width: 390px;
+      margin: 0 auto;
+    }
+
+    .answer-row input {
+      width: 100%;
+      min-width: 0;
+      text-align: center;
+      font-size: 25px;
+      font-weight: 700;
+      padding: 13px;
+      border: 2px solid #cbd5e1;
+      border-radius: 13px;
+      outline: none;
+    }
+
+    .answer-row input:focus {
+      border-color: #6095ee;
+    }
+
+    .answer-row button {
+      min-width: 105px;
+      font-size: 17px;
+    }
+
+    .feedback {
+      min-height: 55px;
+      padding: 15px 8px 0;
+      font-weight: 700;
+      line-height: 1.7;
+    }
+
+    .feedback.correct {
+      color: #15803d;
+    }
+
+    .feedback.wrong {
+      color: #dc4545;
+    }
+
+    .feedback.info {
+      color: #64748b;
+    }
+
+    .score-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .score-box {
+      background: #f8fafc;
+      padding: 13px 5px;
+      border-radius: 13px;
+    }
+
+    .score-box strong {
+      display: block;
+      font-size: 25px;
+      color: #416db5;
+    }
+
+    .score-box span {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .result-emoji {
+      font-size: 64px;
+      margin-bottom: 10px;
+    }
+
+    .result-title {
+      font-size: 28px;
+      color: #3765b5;
+      margin: 5px 0 10px;
+    }
+
+    .result-detail {
+      color: #64748b;
+      line-height: 1.9;
+      margin: 12px 0;
+    }
+
+    .review-list {
+      text-align: left;
+      margin-top: 20px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 15px;
+    }
+
+    .review-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 2px;
+      border-bottom: 1px solid #f1f5f9;
+      line-height: 1.5;
+    }
+
+    .review-item .right {
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .review-ok {
+      color: #15803d;
+    }
+
+    .review-no {
+      color: #dc4545;
+    }
+
+    footer {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 13px;
+      padding: 6px 0 20px;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 18px 14px;
+      }
+
+      .range-grid {
+        gap: 7px;
+      }
+
+      .range-label {
+        min-height: 69px;
+      }
+
+      .range-number {
+        font-size: 19px;
+      }
+
+      .tools button {
+        flex: 1;
+        padding: 10px 8px;
+      }
+
+      .answer-row button {
+        min-width: 90px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header>
+      <div class="mascot" aria-hidden="true">🧮✨</div>
+      <h1>九九乘法練習樂園</h1>
+      <p>選擇想挑戰的倍數，一起成為乘法小高手！</p>
+    </header>
+
+    <section class="card" id="settingsCard">
+      <h2>🎯 ① 選擇練習範圍</h2>
+      <p class="hint">
+        點選一個或多個倍數即可複選。題目只會從你選擇的範圍中出現。
+      </p>
+
+      <div class="range-grid" id="rangeGrid">
+        <!-- 由 JavaScript 產生 2～9 的選項 -->
+      </div>
+
+      <div class="tools">
+        <button type="button" class="btn-light" id="selectAllBtn">
+          ☑ 全選
+        </button>
+        <button type="button" class="btn-light" id="clearAllBtn">
+          □ 全部取消
+        </button>
+      </div>
+
+      <div class="selection-summary" id="selectionSummary" aria-live="polite">
+        目前選擇：2 的倍數
+      </div>
+
+      <h2 style="margin-top:26px">⚙️ ② 練習設定</h2>
+      <div class="settings-row">
+        <label>
+          練習模式
+          <select id="modeSelect">
+            <option value="practice">一般逐題練習</option>
+          </select>
+        </label>
+
+        <label>
+          題目數量
+          <select id="countSelect">
+            <option value="10" selected>10 題</option>
+            <option value="20">20 題</option>
+            <option value="all">完整練習</option>
+          </select>
+        </label>
+      </div>
+
+      <button type="button" class="btn-primary btn-block" id="startBtn">
+        🚀 開始練習
+      </button>
+    </section>
+
+    <section class="card game-card hidden" id="gameCard">
+      <div class="game-status">
+        <span id="questionNumber">第 1 / 10 題</span>
+        <span id="rangeDisplay">練習：2 的倍數</span>
+      </div>
+
+      <div
+        class="progress-track"
+        role="progressbar"
+        aria-label="練習進度"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+        id="progressTrack"
+      >
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <div class="question" id="questionText">2 × 3 = ?</div>
+
+      <form id="answerForm">
+        <div class="answer-row">
+          <input
+            id="answerInput"
+            type="number"
+            inputmode="numeric"
+            step="1"
+            min="0"
+            max="81"
+            placeholder="答案"
+            aria-label="請輸入答案"
+            autocomplete="off"
+            required
+          >
+          <button type="submit" class="btn-primary" id="submitBtn">
+            送出答案
+          </button>
+        </div>
+      </form>
+
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+
+      <div class="score-row">
+        <div class="score-box">
+          <strong id="correctScore">0</strong>
+          <span>答對題數</span>
+        </div>
+        <div class="score-box">
+          <strong id="wrongScore">0</strong>
+          <span>答錯題數</span>
+        </div>
+        <div class="score-box">
+          <strong id="accuracyScore">0%</strong>
+          <span>正確率</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="btn-light btn-block"
+        id="restartBtn"
+      >
+        ↻ 重新開始
+      </button>
+    </section>
+
+    <section class="card game-card hidden" id="resultCard">
+      <div class="result-emoji" id="resultEmoji">🎉</div>
+      <h2 class="result-title" id="resultTitle">練習完成！</h2>
+      <p class="result-detail" id="resultDetail"></p>
+
+      <div class="score-row">
+        <div class="score-box">
+          <strong id="finalCorrect">0</strong>
+          <span>答對題數</span>
+        </div>
+        <div class="score-box">
+          <strong id="finalWrong">0</strong>
+          <span>答錯題數</span>
+        </div>
+        <div class="score-box">
+          <strong id="finalAccuracy">0%</strong>
+          <span>正確率</span>
+        </div>
+      </div>
+
+      <div class="review-list">
+        <h2>📝 答題紀錄</h2>
+        <div id="reviewList"></div>
+      </div>
+
+      <button type="button" class="btn-primary btn-block" id="playAgainBtn">
+        🔄 再練習一次
+      </button>
+      <button type="button" class="btn-light btn-block" id="changeRangeBtn">
+        🎯 更改練習範圍
+      </button>
+    </section>
+
+    <footer>
+      每天練習一點點，數學進步看得見！ 🌈
+    </footer>
+  </main>
+
+  <script>
+    // ===== 遊戲資料 =====
+    const rangeGrid = document.getElementById("rangeGrid");
+    const selectionSummary = document.getElementById("selectionSummary");
+    const startBtn = document.getElementById("startBtn");
+    const settingsCard = document.getElementById("settingsCard");
+    const gameCard = document.getElementById("gameCard");
+    const resultCard = document.getElementById("resultCard");
+    const answerForm = document.getElementById("answerForm");
+    const answerInput = document.getElementById("answerInput");
+    const submitBtn = document.getElementById("submitBtn");
+    const feedback = document.getElementById("feedback");
+
+    let selectedTables = [2];
+    let questions = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let answerHistory = [];
+    let waitingForNext = false;
+
+    // ===== 建立倍數選項 =====
+    function createRangeOptions() {
+      rangeGrid.innerHTML = "";
+
+      for (let n = 2; n <= 9; n++) {
+        const label = document.createElement("label");
+        label.className = "range-option";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = n;
+        checkbox.checked = n === 2;
+        checkbox.setAttribute("aria-label", n + " 的倍數");
+
+        const visual = document.createElement("span");
+        visual.className = "range-label";
+
+        const number = document.createElement("span");
+        number.className = "range-number";
+        number.textContent = n + " 倍";
+
+        const small = document.createElement("span");
+        small.className = "range-small";
+        small.textContent = n + " × 1～9";
+
+        visual.append(number, small);
+        label.append(checkbox, visual);
+        rangeGrid.appendChild(label);
+
+        checkbox.addEventListener("change", () => {
+          selectedTables = Array.from(
+            rangeGrid.querySelectorAll("input:checked")
+          ).map(input => Number(input.value));
+
+          updateSelectionSummary();
+        });
+      }
+
+      updateSelectionSummary();
+    }
+
+    // ===== 範圍選擇 =====
+    function updateSelectionSummary() {
+      const checkboxes = rangeGrid.querySelectorAll("input[type=checkbox]");
+
+      selectedTables = Array.from(checkboxes)
+        .filter(input => input.checked)
+        .map(input => Number(input.value))
+        .sort((a, b) => a - b);
+
+      if (selectedTables.length === 0) {
+        selectionSummary.textContent = "目前尚未選擇範圍，請至少選一個倍數。";
+        startBtn.disabled = true;
+        return;
+      }
+
+      selectionSummary.textContent =
+        "目前選擇：" +
+        selectedTables.map(n => n + " 的倍數").join("、") +
+        "；共 " + selectedTables.length + " 個範圍。";
+
+      startBtn.disabled = false;
+    }
+
+    document.getElementById("selectAllBtn").addEventListener("click", () => {
+      rangeGrid.querySelectorAll("input").forEach(input => {
+        input.checked = true;
+      });
+      updateSelectionSummary();
+    });
+
+    document.getElementById("clearAllBtn").addEventListener("click", () => {
+      rangeGrid.querySelectorAll("input").forEach(input => {
+        input.checked = false;
+      });
+      updateSelectionSummary();
+    });
+
+    // ===== 建立題目 =====
+    function createQuestions() {
+      const pool = [];
+
+      // 只從使用者勾選的倍數產生題目。
+      selectedTables.forEach(table => {
+        for (let multiplier = 1; multiplier <= 9; multiplier++) {
+          pool.push({
+            a: table,
+            b: multiplier,
+            answer: table * multiplier
+          });
+        }
+      });
+
+      // 隨機打亂題目順序。
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+
+      const count = document.getElementById("countSelect").value;
+
+      if (count === "all") {
+        return pool;
+      }
+
+      const requestedCount = Number(count);
+
+      // 若題目數量超過不重複題目總數，循環補足。
+      const result = pool.slice(0, requestedCount);
+
+      while (result.length < requestedCount) {
+        const q = pool[Math.floor(Math.random() * pool.length)];
+        result.push({ ...q });
+      }
+
+      return result;
+    }
+
+    // ===== 開始或重新開始 =====
+    function startGame() {
+      updateSelectionSummary();
+
+      if (selectedTables.length === 0) {
+        alert("請至少選擇一個倍數範圍！");
+        return;
+      }
+
+      questions = createQuestions();
+      currentIndex = 0;
+      correctCount = 0;
+      wrongCount = 0;
+      answerHistory = [];
+      waitingForNext = false;
+
+      settingsCard.classList.add("hidden");
+      resultCard.classList.add("hidden");
+      gameCard.classList.remove("hidden");
+
+      document.getElementById("rangeDisplay").textContent =
+        "練習：" + selectedTables.map(n => n + " 倍").join("、");
+
+      updateScore();
+      showQuestion();
+    }
+
+    function showQuestion() {
+      if (currentIndex >= questions.length) {
+        showResult();
+        return;
+      }
+
+      const q = questions[currentIndex];
+
+      document.getElementById("questionNumber").textContent =
+        "第 " + (currentIndex + 1) + " / " + questions.length + " 題";
+
+      document.getElementById("questionText").textContent =
+        q.a + " × " + q.b + " = ?";
+
+      const progress = Math.round(
+        (currentIndex / questions.length) * 100
+      );
+
+      document.getElementById("progressBar").style.width = progress + "%";
+      document.getElementById("progressTrack").setAttribute(
+        "aria-valuenow",
+        progress
+      );
+
+      answerInput.value = "";
+      answerInput.disabled = false;
+      submitBtn.disabled = false;
+      submitBtn.textContent = "送出答案";
+
+      feedback.textContent = "";
+      feedback.className = "feedback";
+
+      waitingForNext = false;
+      answerInput.focus();
+    }
+
+    // ===== 作答與判斷 =====
+    answerForm.addEventListener("submit", event => {
+      event.preventDefault();
+
+      if (waitingForNext) {
+        currentIndex++;
+        showQuestion();
+        return;
+      }
+
+      const rawAnswer = answerInput.value.trim();
+
+      if (rawAnswer === "") {
+        feedback.textContent = "請先輸入答案喔！";
+        feedback.className = "feedback info";
+        answerInput.focus();
+        return;
+      }
+
+      const userAnswer = Number(rawAnswer);
+
+      if (!Number.isInteger(userAnswer) || userAnswer < 0) {
+        feedback.textContent = "請輸入有效的整數答案。";
+        feedback.className = "feedback info";
+        answerInput.focus();
+        return;
+      }
+
+      const q = questions[currentIndex];
+      const isCorrect = userAnswer === q.answer;
+
+      answerHistory.push({
+        question: q.a + " × " + q.b,
+        userAnswer,
+        answer: q.answer,
+        isCorrect
+      });
+
+      if (isCorrect) {
+        correctCount++;
+        feedback.textContent = "🎉 答對了！你好棒！";
+        feedback.className = "feedback correct";
+      } else {
+        wrongCount++;
+        feedback.textContent =
+          "💡 再接再厲！正確答案是 " + q.answer + "。";
+        feedback.className = "feedback wrong";
+      }
+
+      updateScore();
+
+      answerInput.disabled = true;
+      waitingForNext = true;
+      submitBtn.textContent =
+        currentIndex === questions.length - 1 ? "查看結果" : "下一題";
+
+      answerInput.blur();
+      submitBtn.focus();
+    });
+
+    // ===== 即時分數 =====
+    function updateScore() {
+      const totalAnswered = correctCount + wrongCount;
+      const accuracy = totalAnswered === 0
+        ? 0
+        : Math.round((correctCount / totalAnswered) * 100);
+
+      document.getElementById("correctScore").textContent = correctCount;
+      document.getElementById("wrongScore").textContent = wrongCount;
+      document.getElementById("accuracyScore").textContent = accuracy + "%";
+    }
+
+    // ===== 顯示最後結果 =====
+    function showResult() {
+      gameCard.classList.add("hidden");
+      resultCard.classList.remove("hidden");
+
+      const total = questions.length;
+      const accuracy = Math.round((correctCount / total) * 100);
+
+      document.getElementById("progressBar").style.width = "100%";
+      document.getElementById("resultEmoji").textContent =
+        accuracy === 100 ? "🏆" :
+        accuracy >= 80 ? "🎉" :
+        accuracy >= 60 ? "🌟" : "💪";
+
+      document.getElementById("resultTitle").textContent =
+        accuracy === 100 ? "太厲害了！全部答對！" :
+        accuracy >= 80 ? "表現優秀！繼續保持！" :
+        accuracy >= 60 ? "做得不錯！再練習就會更好！" :
+        "別灰心！多練習就會進步！";
+
+      document.getElementById("resultDetail").textContent =
+        "你完成了 " + total + " 題，正確率是 " + accuracy +
+        "%。記得持續練習，讓乘法越來越熟練！";
+
+      document.getElementById("finalCorrect").textContent = correctCount;
+      document.getElementById("finalWrong").textContent = wrongCount;
+      document.getElementById("finalAccuracy").textContent = accuracy + "%";
+
+      const reviewList = document.getElementById("reviewList");
+      reviewList.innerHTML = "";
+
+      answerHistory.forEach((item, index) => {
+        const row = document.createElement("div");
+        row.className = "review-item";
+
+        const left = document.createElement("span");
+        left.textContent = (index + 1) + ". " + item.question + " = " +
+          item.answer;
+
+        const right = document.createElement("span");
+        right.className = "right " +
+          (item.isCorrect ? "review-ok" : "review-no");
+
+        right.textContent = item.isCorrect
+          ? "✓ 答對"
+          : "✗ 你的答案：" + item.userAnswer;
+
+        row.append(left, right);
+        reviewList.appendChild(row);
+      });
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // ===== 按鈕 =====
+    startBtn.addEventListener("click", startGame);
+
+    document.getElementById("restartBtn").addEventListener("click", startGame);
+
+    document.getElementById("playAgainBtn").addEventListener("click", startGame);
+
+    document.getElementById("changeRangeBtn").addEventListener("click", () => {
+      resultCard.classList.add("hidden");
+      settingsCard.classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // 初始化
+    createRangeOptions();
+  </script>
+</body>
+</html>
